@@ -7,6 +7,18 @@ const Helpers = require('./helpers');
 const ModbusRTU = require('modbus-serial');
 const Models = require('./models');
 
+String.prototype.hashCode = function () {
+	var hash = 0,
+		i, chr;
+	if (this.length === 0) return hash;
+	for (i = 0; i < this.length; i++) {
+		chr = this.charCodeAt(i);
+		hash = ((hash << 5) - hash) + chr;
+		hash |= 0; // Convert to 32bit integer
+	}
+	return btoa(hash);
+}
+
 const client = mqtt.connect(`mqtt://${Config.MQTT.host}`, {
 	username: Config.MQTT.user,
 	password: Config.MQTT.pass,
@@ -14,7 +26,7 @@ const client = mqtt.connect(`mqtt://${Config.MQTT.host}`, {
 
 const client_status = {
 	mqtt_connected: false,
-	mbus_connected: false,	
+	mbus_connected: false,
 };
 
 /**
@@ -36,8 +48,8 @@ const readADCValues = async () => {
 	await adc.openBus(1);
 
 	// measure / 1e3
-	const measure_adc_current = (await adc.readSingleEnded({channel: 0})) / 1e3;
-	const measure_adc_vcc = (await adc.readSingleEnded({channel: 1})) / 1e3;
+	const measure_adc_current = (await adc.readSingleEnded({ channel: 0 })) / 1e3;
+	const measure_adc_vcc = (await adc.readSingleEnded({ channel: 1 })) / 1e3;
 	const measure_adc_voltage = (await adc.readSingleEnded({
 		channelPositive: 2,
 		channelNegative: 3,
@@ -65,29 +77,29 @@ const connectToSerial = () => {
 			try {
 				const modbus = new ModbusRTU();
 				const interval = 5 * 1000;
-	
+
 				if (!fs.existsSync(Config.Serial.port)) {
 					throw new Error(`The port is not available, will be try again in ${timeout}s ...`);
 				}
-		
+
 				console.log(`[MBUS] ${new Date()} - Connected to ${Config.Serial.port}`);
 				client_status.mbus_connected = true;
-		
+
 				modbus.connectRTUBuffered(Config.Serial.port, Config.Serial.config);
 				modbus.setTimeout(timeout * 1000);
 				modbus.setID(10);
-		
+
 				setInterval(async () => {
 					const config = (await modbus.readHoldingRegisters(30000, 27)).data;
 					const values = (await modbus.readHoldingRegisters(30030, 30)).data;
 					const pv = await readADCValues();
-		
+
 					onSendData(new Models.Values(config, values, pv));
 				}, interval);
 			} catch (error) {
 				client_status.mbus_connected = false;
 				console.warn(`[MBUS] ${new Date()} - ${error}`);
-		
+
 				await Helpers.Sleep(timeout * 1000);
 			}
 		}
@@ -104,7 +116,13 @@ client.on('connect', () => {
 			unit_of_measurement: Models.ValuesConfig[key][0],
 			state_topic: `homeassistant/sensor/must-inverter/${key}`,
 			icon: `mdi:${Models.ValuesConfig[key][1]}`,
-			unique_id: `must-inverter_${key}`
+			unique_id: `must-inverter_${key}_${key.hashCode()}`,
+			device: {
+				identifiers: [`must-inverter_${key}_${key.hashCode()}`],
+				manufacturer: 'Must',
+				model: 'PV3300TLV',
+				name: 'Hybrid Solar Inverter',
+			}
 		};
 
 		if (Models.ValuesConfig[key].length > 2) {
