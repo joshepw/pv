@@ -11,10 +11,10 @@ class Values {
 		this.DeviceBuzzerState = BuzzerState[config[20]];
 		this.DeviceSystemFault = FaultCodes[config[21]];
 		
-		this.PvState = pv.power > 2 ? PvState[0] : PvState[2];
+		this.PvState = pv.voltage > 5 ? PvState[1] : PvState[2];
 
-		if (pv.voltage > 5) {
-			this.PvState = PvState[1];
+		if (pv.power > 2) {
+			this.PvState = PvState[0];
 		}
 
 		this.PvVoltage = pv.voltage;
@@ -37,6 +37,7 @@ class Values {
 		this.GridCharge = Boolean(config[24]);
 		this.GridState = GridState[config[25]];
 		this.GridVoltage = Helpers.ParseValue(values[2], 0.1);
+		this.GridPower = config[2] == 2 ? Helpers.ParseSignedValue(values[18]) : 0;
 		this.GridFrequency = Helpers.ParseValue(values[3], 0.1);
 
 		this.L1Voltage = Helpers.ParseValue(values[6], 0.1);
@@ -131,6 +132,7 @@ const ValuesConfig = {
 	GridCharge: ['', 'transmission-tower'],
 	GridState: ['', 'transmission-tower'],
 	GridVoltage: ['Vac', 'current-ac', 'voltage', 'measurement'],
+	GridPower: ['Wh', 'solar-power', 'power', 'measurement'],
 	GridFrequency: ['Hz', 'sine-wave', 'frequency', 'measurement'],
 	L1Voltage: ['Vac', 'current-ac', 'voltage', 'measurement'],
 	L1Current: ['Aac', 'current-ac', 'current', 'measurement'],
