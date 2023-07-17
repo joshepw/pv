@@ -1,7 +1,7 @@
 const process = require('process');
 const mqtt = require('mqtt');
 const fs = require('fs');
-const ads1x15 = require('ads1x15');
+// const ads1x15 = require('ads1x15');
 const Config = require('./config');
 const Helpers = require('./helpers');
 const ModbusRTU = require('modbus-serial');
@@ -24,7 +24,7 @@ const client_status = {
  */
 const onSendData = (values) => {
 	Object.keys(Models.ValuesConfig).forEach(key => {
-		client.publish(`homeassistant/sensor/${key}`, `${values[key]}`);
+		client.publish(`homeassistant/sensor/must-inverter/${key}`, `${values[key]}`);
 	});
 };
 
@@ -99,12 +99,19 @@ client.on('connect', () => {
 	console.log(`[MQTT] ${new Date()} - Connected to ${Config.MQTT.host}`);
 
 	Object.keys(Models.ValuesConfig).forEach(key => {
-		client.publish(`homeassistant/sensor/${key}/config`, JSON.stringify({
+		const payload = {
 			name: key,
 			unit_of_measurement: Models.ValuesConfig[key][0],
-			state_topic: `homeassistant/sensor/${key}`,
-			icon: Models.ValuesConfig[key][1]
-		}));
+			state_topic: `homeassistant/sensor/must-inverter/${key}`,
+			icon: `mdi:${Models.ValuesConfig[key][1]}`
+		};
+
+		if (Models.ValuesConfig[key].length > 2) {
+			payload.device_class = Models.ValuesConfig[key][2];
+			payload.state_class = Models.ValuesConfig[key][3];
+		}
+
+		client.publish(`homeassistant/sensor/must-inverter/${key}/config`, JSON.stringify(payload));
 	});
 
 	try {
