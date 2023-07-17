@@ -24,7 +24,7 @@ const client_status = {
  */
 const onSendData = (values) => {
 	Object.keys(Models.ValuesConfig).forEach(key => {
-		client.publish(`homeassistant/sensor/${key}`, values[key]);
+		client.publish(`homeassistant/sensor/${key}`, `${values[key]}`);
 	});
 };
 
