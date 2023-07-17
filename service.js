@@ -1,7 +1,7 @@
 const process = require('process');
 const mqtt = require('mqtt');
 const fs = require('fs');
-// const ads1x15 = require('ads1x15');
+const ads1x15 = require('ads1x15');
 const Config = require('./config');
 const Helpers = require('./helpers');
 const ModbusRTU = require('modbus-serial');
