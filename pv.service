@@ -1,0 +1,17 @@
+[Unit]
+Description=pv
+After=network.target
+
+[Service]
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/node service.js
+WorkingDirectory=/opt/pv
+StandardOutput=inherit
+
+StandardError=inherit
+Restart=always
+RestartSec=10s
+User=joshepw
+
+[Install]
+WantedBy=multi-user.target

@@ -2,10 +2,16 @@ const process = require('process');
 const mqtt = require('mqtt');
 const fs = require('fs');
 const ads1x15 = require('ads1x15');
+const sqlite3 = require('sqlite3');
 const Config = require('./config');
 const Helpers = require('./helpers');
 const ModbusRTU = require('modbus-serial');
 const Models = require('./models');
+
+const seconds_interval = 5;
+let lapsedSeconds = 0;
+let consumption = 0;
+let systemFault = null;
 
 String.prototype.hashCode = function () {
 	var hash = 0,
@@ -18,6 +24,8 @@ String.prototype.hashCode = function () {
 	}
 	return Buffer.from(`${hash}`).toString('base64');
 }
+
+const db = new sqlite3.Database('historical.db');
 
 const client = mqtt.connect(`mqtt://${Config.MQTT.host}`, {
 	username: Config.MQTT.user,
@@ -35,6 +43,22 @@ const client_status = {
  * @param {Models.Values} values 
  */
 const onSendData = (values) => {
+	if (values.DeviceSystemFault != 'None') {
+		systemFault = values.DeviceSystemFault;
+	}
+
+	consumption = (values.OutputPower / (3600 / seconds_interval)) + consumption;
+
+	if (lapsedSeconds > 59) {
+		onLapsedMinute(values);
+		
+		lapsedSeconds = 0;
+		consumption = 0;
+		systemFault = null;
+	} else {
+		lapsedSeconds++;
+	}
+
 	Object.keys(Models.ValuesConfig).forEach(key => {
 		client.publish(`homeassistant/sensor/must-inverter/${key}`, `${values[key]}`);
 	});
@@ -76,7 +100,7 @@ const connectToSerial = () => {
 		while (!client_status.mbus_connected) {
 			try {
 				const modbus = new ModbusRTU();
-				const interval = 5 * 1000;
+				const interval = seconds_interval * 1000;
 
 				if (!fs.existsSync(Config.Serial.port)) {
 					throw new Error(`The port is not available, will be try again in ${timeout}s ...`);
@@ -110,34 +134,45 @@ const connectToSerial = () => {
 	})();
 };
 
+/**
+ * @param {Models.Values} values 
+ */
+const onLapsedMinute = function (values) {
+	if (systemFault != 'None') {
+		db.run(`INSERT INTO faults (message) VALUES ("${systemFault}")`);
+	}
+
+	db.run(`INSERT INTO power (state, l1power, l2power, watts) VALUES ("${values.DeviceWorkState}", ${values.L1Power}, ${values.L2Power}, ${values.OutputPower})`);
+	db.run(`INSERT INTO consumption (power, state) VALUES (${consumption}, "${values.DeviceWorkState}")`);
+	db.run(`INSERT INTO battery (percent, temp, state) VALUES (${values.BatterySocPercent}, ${values.BatteryTemperature}, "${values.BatteryState}")`);
+};
+
 client.on('connect', () => {
 	client_status.mqtt_connected = true;
 	console.log(`[MQTT] ${new Date()} - Connected to ${Config.MQTT.host}`);
 
 	Object.keys(Models.ValuesConfig).forEach(key => {
 		const payload = {
-			name: key.split(/(?=[A-Z])/).join(' '),
-			unit_of_measurement: Models.ValuesConfig[key][0],
-			state_topic: `homeassistant/sensor/must-inverter/${key}`,
-			icon: `mdi:${Models.ValuesConfig[key][1]}`,
-			unique_id: `must-inverter_${key}_${key.hashCode()}`,
 			device: {
-				identifiers: [`must-inverter_${key}_${key.hashCode()}`],
+				identifiers: ['must-inverter_PV3300TLV'],
 				manufacturer: 'Must',
 				model: 'PV3300TLV',
 				name: 'Hybrid Solar Inverter',
-			}
+			},
+			name: key.split(/(?=[A-Z])/).join(' '),
+			state_topic: `homeassistant/sensor/must-inverter/${key}`,
+			unique_id: `must-inverter_${key}_${key.hashCode()}`,
+			...Models.ValuesConfig[key],
 		};
-
-		if (Models.ValuesConfig[key].length > 2) {
-			payload.device_class = Models.ValuesConfig[key][2];
-			payload.state_class = Models.ValuesConfig[key][3];
-		}
 
 		client.publish(`homeassistant/sensor/must-inverter/${key}/config`, JSON.stringify(payload));
 	});
 
 	try {
+		db.run('CREATE TABLE IF NOT EXISTS "battery" ("id" integer,"percent" int,"temp" int,"state" varchar, "timestamp" DATE DEFAULT (datetime(\'now\',\'localtime\')), PRIMARY KEY (id));');
+		db.run('CREATE TABLE IF NOT EXISTS "consumption" ("id" integer,"power" int,"state" varchar,"timestamp" DATE DEFAULT (datetime(\'now\',\'localtime\')), PRIMARY KEY (id));');
+		db.run('CREATE TABLE IF NOT EXISTS "faults" ("id" integer,"message" varchar, "timestamp" DATE DEFAULT (datetime(\'now\',\'localtime\')), PRIMARY KEY (id));');
+
 		connectToSerial();
 	} catch (e) {
 		console.log(e)

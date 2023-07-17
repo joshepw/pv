@@ -10,7 +10,7 @@ class Values {
 		this.DeviceTransformerTemperature = Helpers.ParseValue(config[19]);
 		this.DeviceBuzzerState = BuzzerState[config[20]];
 		this.DeviceSystemFault = FaultCodes[config[21]] || 'None';
-		
+
 		this.PvState = pv.voltage > 5 ? PvState[1] : PvState[2];
 
 		if (pv.power > 2) {
@@ -30,7 +30,7 @@ class Values {
 		this.BatteryClass = Helpers.ParseValue(config[3]);
 		this.BatteryVoltage = Helpers.ParseValue(config[14], 0.1);
 		this.BatteryCurrent = Helpers.ParseSignedValue(config[15], 0.1);
-		this.BatteryPower = this.BatteryVoltage * this.BatteryCurrent;
+		this.BatteryPower = this.GridPower = config[2] == 1 ? Helpers.ParseSignedValue(values[18]) : 0;
 		this.BatteryTemperature = Helpers.ParseSignedValue(config[16]);
 		this.BatterySocPercent = Helpers.ParseSignedValue(config[17]);
 
@@ -110,45 +110,240 @@ const FaultCodes = {
 };
 
 const ValuesConfig = {
-	DeviceWorkState: ['', 'state-machine', 'enum', 'measurement'],
-	DeviceMachineType: ['', 'power-plug-battery-outline'],
-	DeviceSoftwareVersion: ['', 'counter'],
-	DeviceRatedPower: ['Wh', 'lightbulb-outline'],
-	DeviceRadiatorTemperature: ['°C', 'thermometer', 'temperature', 'measurement'],
-	DeviceTransformerTemperature: ['°C', 'thermometer', 'temperature', 'measurement'],
-	DeviceBuzzerState: ['', 'bullhorn', 'enum', 'measurement'],
-	DeviceSystemFault: ['', 'alert-circle-outline', 'enum', 'measurement'],
-	PvState: ['', 'solar-panel', 'enum', 'measurement'],
-	PvVoltage: ['V', 'current-dc', 'voltage', 'measurement'],
-	PvCurrent: ['A', 'current-dc', 'current', 'measurement'],
-	PvPower: ['Wh', 'solar-power', 'power', 'measurement'],
-	BatteryState: ['', 'car-battery', 'enum', 'measurement'],
-	BatteryClass: ['V', 'car-battery', 'voltage', 'measurement'],
-	BatteryVoltage: ['V', 'current-dc', 'voltage', 'measurement'],
-	BatteryCurrent: ['A', 'current-dc', 'current', 'measurement'],
-	BatteryPower: ['Wh', 'current-dc', 'power', 'measurement'],
-	BatteryTemperature: ['°C', 'thermometer', 'temperature', 'measurement'],
-	BatterySocPercent: ['%', 'battery-medium', 'battery', 'measurement'],
-	GridCharge: ['', 'transmission-tower', 'enum', 'measurement'],
-	GridState: ['', 'transmission-tower', 'enum', 'measurement'],
-	GridVoltage: ['V', 'current-ac', 'voltage', 'measurement'],
-	GridPower: ['Wh', 'current-ac', 'power', 'measurement'],
-	GridFrequency: ['Hz', 'sine-wave', 'frequency', 'measurement'],
-	L1Voltage: ['V', 'current-ac', 'voltage', 'measurement'],
-	L1Current: ['A', 'current-ac', 'current', 'measurement'],
-	L1Power: ['Wh', 'current-ac', 'power', 'measurement'],
-	L1VoltageCurrent: ['VA', 'lightbulb-on-outline', 'apparent_power', 'measurement'],
-	L1LoadPercent: ['%', 'power-plug', 'power_factor', 'measurement'],
-	L2Voltage: ['V', 'current-ac', 'voltage', 'measurement'],
-	L2Current: ['A', 'current-ac', 'current', 'measurement'],
-	L2Power: ['Wh', 'current-ac', 'power', 'measurement'],
-	L2VoltageCurrent: ['VA', 'lightbulb-on-outline', 'apparent_power', 'measurement'],
-	L2LoadPercent: ['%', 'power-plug', 'power_factor', 'measurement'],
-	OutputVoltage: ['V', 'current-ac', 'voltage', 'measurement'],
-	OutputFrequency: ['Hz', 'sine-wave', 'frequency', 'measurement'],
-	OutputPower: ['Wh', 'current-ac', 'power', 'measurement'],
-	OutputVoltageCurrent: ['VC', 'power-plug', 'current', 'measurement'],
-	OutputLoadPercent: ['%', 'power-plug', 'power_factor', 'measurement'],
+	DeviceWorkState: {
+		unit_of_measurement: '',
+		icon: 'mdi:state-machine',
+		device_class: 'enum',
+		state_class: 'measurement',
+		options: WorkState
+	},
+	DeviceMachineType: {
+		unit_of_measurement: '',
+		icon: 'mdi:power-plug-battery-outline'
+	},
+	DeviceSoftwareVersion: {
+		unit_of_measurement: '',
+		icon: 'mdi:counter'
+	},
+	DeviceRatedPower: {
+		unit_of_measurement: 'Wh',
+		icon: 'mdi:lightbulb-outline'
+	},
+	DeviceRadiatorTemperature: {
+		unit_of_measurement: '°C',
+		icon: 'mdi:thermometer',
+		device_class: 'temperature',
+		state_class: 'measurement'
+	},
+	DeviceTransformerTemperature: {
+		unit_of_measurement: '°C',
+		icon: 'mdi:thermometer',
+		device_class: 'temperature',
+		state_class: 'measurement'
+	},
+	DeviceBuzzerState: {
+		unit_of_measurement: '',
+		icon: 'mdi:bullhorn',
+		device_class: 'enum',
+		state_class: 'measurement',
+		options: BuzzerState
+	},
+	DeviceSystemFault: {
+		unit_of_measurement: '',
+		icon: 'mdi:alert-circle-outline',
+		device_class: 'enum',
+		state_class: 'measurement',
+		options: Object.values(FaultCodes)
+	},
+	PvState: {
+		unit_of_measurement: '',
+		icon: 'mdi:solar-panel',
+		device_class: 'enum',
+		state_class: 'measurement',
+		options: PvState
+	},
+	PvVoltage: {
+		unit_of_measurement: 'V',
+		icon: 'mdi:current-dc',
+		device_class: 'voltage',
+		state_class: 'measurement'
+	},
+	PvCurrent: {
+		unit_of_measurement: 'A',
+		icon: 'mdi:current-dc',
+		device_class: 'current',
+		state_class: 'measurement'
+	},
+	PvPower: {
+		unit_of_measurement: 'Wh',
+		icon: 'mdi:solar-power',
+		device_class: 'energy',
+		state_class: 'measurement',
+	},
+	BatteryState: {
+		unit_of_measurement: '',
+		icon: 'mdi:car-battery',
+		device_class: 'enum',
+		state_class: 'measurement',
+		options: BatteryState
+	},
+	BatteryClass: {
+		unit_of_measurement: 'V',
+		icon: 'mdi:car-battery',
+		device_class: 'voltage',
+		state_class: 'measurement'
+	},
+	BatteryVoltage: {
+		unit_of_measurement: 'V',
+		icon: 'mdi:current-dc',
+		device_class: 'voltage',
+		state_class: 'measurement'
+	},
+	BatteryCurrent: {
+		unit_of_measurement: 'A',
+		icon: 'mdi:current-dc',
+		device_class: 'current',
+		state_class: 'measurement'
+	},
+	BatteryPower: {
+		unit_of_measurement: 'Wh',
+		icon: 'mdi:current-dc',
+		device_class: 'energy',
+		state_class: 'measurement'
+	},
+	BatteryTemperature: {
+		unit_of_measurement: '°C',
+		icon: 'mdi:thermometer',
+		device_class: 'temperature',
+		state_class: 'measurement'
+	},
+	BatterySocPercent: {
+		unit_of_measurement: '%',
+		icon: 'mdi:battery-medium',
+		device_class: 'battery',
+		state_class: 'measurement'
+	},
+	GridCharge: {
+		unit_of_measurement: '',
+		icon: 'mdi:transmission-tower',
+		device_class: 'enum',
+		state_class: 'measurement',
+	},
+	GridState: {
+		unit_of_measurement: '',
+		icon: 'mdi:transmission-tower',
+		device_class: 'enum',
+		state_class: 'measurement',
+		options: GridState
+	},
+	GridVoltage: {
+		unit_of_measurement: 'V',
+		icon: 'mdi:current-ac',
+		device_class: 'voltage',
+		state_class: 'measurement'
+	},
+	GridPower: {
+		unit_of_measurement: 'Wh',
+		icon: 'mdi:current-ac',
+		device_class: 'energy',
+		state_class: 'measurement'
+	},
+	GridFrequency: {
+		unit_of_measurement: 'Hz',
+		icon: 'mdi:sine-wave',
+		device_class: 'frequency',
+		state_class: 'measurement'
+	},
+	L1Voltage: {
+		unit_of_measurement: 'V',
+		icon: 'mdi:current-ac',
+		device_class: 'voltage',
+		state_class: 'measurement'
+	},
+	L1Current: {
+		unit_of_measurement: 'A',
+		icon: 'mdi:current-ac',
+		device_class: 'current',
+		state_class: 'measurement'
+	},
+	L1Power: {
+		unit_of_measurement: 'Wh',
+		icon: 'mdi:current-ac',
+		device_class: 'power',
+		state_class: 'measurement'
+	},
+	L1VoltageCurrent: {
+		unit_of_measurement: 'VA',
+		icon: 'mdi:lightbulb-on-outline',
+		device_class: 'apparent_power',
+		state_class: 'measurement'
+	},
+	L1LoadPercent: {
+		unit_of_measurement: '%',
+		icon: 'mdi:power-plug',
+		device_class: 'power_factor',
+		state_class: 'measurement'
+	},
+	L2Voltage: {
+		unit_of_measurement: 'V',
+		icon: 'mdi:current-ac',
+		device_class: 'voltage',
+		state_class: 'measurement'
+	},
+	L2Current: {
+		unit_of_measurement: 'A',
+		icon: 'mdi:current-ac',
+		device_class: 'current',
+		state_class: 'measurement'
+	},
+	L2Power: {
+		unit_of_measurement: 'Wh',
+		icon: 'mdi:current-ac',
+		device_class: 'power',
+		state_class: 'measurement'
+	},
+	L2VoltageCurrent: {
+		unit_of_measurement: 'VA',
+		icon: 'mdi:lightbulb-on-outline',
+		device_class: 'apparent_power',
+		state_class: 'measurement'
+	},
+	L2LoadPercent: {
+		unit_of_measurement: '%',
+		icon: 'mdi:power-plug',
+		device_class: 'power_factor',
+		state_class: 'measurement'
+	},
+	OutputVoltage: {
+		unit_of_measurement: 'V',
+		icon: 'mdi:current-ac',
+		device_class: 'voltage',
+		state_class: 'measurement'
+	},
+	OutputFrequency: {
+		unit_of_measurement: 'Hz',
+		icons: 'mdi:sine-wave',
+		device_class: 'frequency',
+		state_class: 'measurement'
+	},
+	OutputPower: {
+		unit_of_measurement: 'Wh',
+		icon: 'mdi:current-ac',
+		device_class: 'energy',
+		state_class: 'measurement'
+	},
+	OutputVoltageCurrent: {
+		unit_of_measurement: 'VC',
+		icon: 'mdi:power-plug',
+		device_class: 'current',
+		state_class: 'measurement'
+	},
+	OutputLoadPercent: {
+		unit_of_measurement: '%',
+		icon: 'mdi:power-plug',
+		device_class: 'power_factor',
+		state_class: 'measurement'
+	},
 };
 
 exports.WorkState = WorkState;
