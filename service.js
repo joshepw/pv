@@ -100,7 +100,7 @@ client.on('connect', () => {
 
 	Object.keys(Models.ValuesConfig).forEach(key => {
 		const payload = {
-			name: key,
+			name: key.split(/(?=[A-Z])/).join(' '),
 			unit_of_measurement: Models.ValuesConfig[key][0],
 			state_topic: `homeassistant/sensor/must-inverter/${key}`,
 			icon: `mdi:${Models.ValuesConfig[key][1]}`

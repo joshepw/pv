@@ -132,7 +132,7 @@ const ValuesConfig = {
 	GridCharge: ['', 'transmission-tower'],
 	GridState: ['', 'transmission-tower'],
 	GridVoltage: ['Vac', 'current-ac', 'voltage', 'measurement'],
-	GridPower: ['Wh', 'solar-power', 'power', 'measurement'],
+	GridPower: ['Wh', 'current-ac', 'power', 'measurement'],
 	GridFrequency: ['Hz', 'sine-wave', 'frequency', 'measurement'],
 	L1Voltage: ['Vac', 'current-ac', 'voltage', 'measurement'],
 	L1Current: ['Aac', 'current-ac', 'current', 'measurement'],
