@@ -16,7 +16,7 @@ String.prototype.hashCode = function () {
 		hash = ((hash << 5) - hash) + chr;
 		hash |= 0; // Convert to 32bit integer
 	}
-	return Buffer.from(hash).toString('base64');
+	return Buffer.from(`${hash}`).toString('base64');
 }
 
 const client = mqtt.connect(`mqtt://${Config.MQTT.host}`, {
