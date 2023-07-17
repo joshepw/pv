@@ -90,11 +90,15 @@ const connectToSerial = () => {
 				modbus.setID(10);
 
 				setInterval(async () => {
-					const config = (await modbus.readHoldingRegisters(30000, 27)).data;
-					const values = (await modbus.readHoldingRegisters(30030, 30)).data;
-					const pv = await readADCValues();
+					try {
+						const config = (await modbus.readHoldingRegisters(30000, 27)).data;
+						const values = (await modbus.readHoldingRegisters(30030, 30)).data;
+						const pv = await readADCValues();
 
-					onSendData(new Models.Values(config, values, pv));
+						onSendData(new Models.Values(config, values, pv));
+					} catch (error) {
+						console.warn(`[MBUS] ${new Date()} - ${error}`);		
+					}
 				}, interval);
 			} catch (error) {
 				client_status.mbus_connected = false;
