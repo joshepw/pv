@@ -71,7 +71,7 @@ const connectToSerial = () => {
 				}
 		
 				console.log(`[MBUS] ${new Date()} - Connected to ${Config.Serial.port}`);
-				modbus_status.mbus_connected = true;
+				client_status.mbus_connected = true;
 		
 				modbus.connectRTUBuffered(Config.Serial.port, Config.Serial.config);
 				modbus.setTimeout(timeout * 1000);

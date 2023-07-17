@@ -1,5 +1,5 @@
 exports.Serial = {
-	port: '/dev/tty.usbserial-1420',
+	port: '/dev/ttyUSB0',
 	config: { 
 		baudRate: 9600,
 		databits: 8,
