@@ -17,9 +17,9 @@ class Values {
 			this.PvState = PvState[0];
 		}
 
-		this.PvVoltage = pv.voltage;
-		this.PvCurrent = pv.current;
-		this.PvPower = pv.power;
+		this.PvVoltage = pv.voltage.toFixed(2);
+		this.PvCurrent = pv.current.toFixed(2);
+		this.PvPower = pv.power.toFixed(2);
 
 		this.BatteryState = BatteryState[config[2] == 1 ? 1 : 0];
 
