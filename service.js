@@ -51,7 +51,7 @@ const onSendData = (values) => {
 
 	if (lapsedSeconds > 59) {
 		onLapsedMinute(values);
-		
+
 		lapsedSeconds = 0;
 		consumption = 0;
 		systemFault = null;
@@ -142,7 +142,6 @@ const onLapsedMinute = function (values) {
 		db.run(`INSERT INTO faults (message) VALUES ("${systemFault}")`);
 	}
 
-	db.run(`INSERT INTO power (state, l1power, l2power, watts) VALUES ("${values.DeviceWorkState}", ${values.L1Power}, ${values.L2Power}, ${values.OutputPower})`);
 	db.run(`INSERT INTO consumption (power, state) VALUES (${consumption}, "${values.DeviceWorkState}")`);
 	db.run(`INSERT INTO battery (percent, temp, state) VALUES (${values.BatterySocPercent}, ${values.BatteryTemperature}, "${values.BatteryState}")`);
 };
