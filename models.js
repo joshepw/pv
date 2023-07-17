@@ -9,7 +9,7 @@ class Values {
 		this.DeviceRadiatorTemperature = Helpers.ParseValue(config[18]);
 		this.DeviceTransformerTemperature = Helpers.ParseValue(config[19]);
 		this.DeviceBuzzerState = BuzzerState[config[20]];
-		this.DeviceSystemFault = FaultCodes[config[21]];
+		this.DeviceSystemFault = FaultCodes[config[21]] || 'None';
 		
 		this.PvState = pv.voltage > 5 ? PvState[1] : PvState[2];
 
@@ -110,7 +110,7 @@ const FaultCodes = {
 };
 
 const ValuesConfig = {
-	DeviceWorkState: ['', 'state-machine'],
+	DeviceWorkState: ['', 'state-machine', 'enum', 'measurement'],
 	DeviceMachineType: ['', 'power-plug-battery-outline'],
 	DeviceSoftwareVersion: ['', 'counter'],
 	DeviceRatedPower: ['Wh', 'lightbulb-outline'],
@@ -119,23 +119,23 @@ const ValuesConfig = {
 	DeviceBuzzerState: ['', 'bullhorn', 'enum', 'measurement'],
 	DeviceSystemFault: ['', 'alert-circle-outline', 'enum', 'measurement'],
 	PvState: ['', 'solar-panel', 'enum', 'measurement'],
-	PvVoltage: ['Vdc', 'current-dc', 'voltage', 'measurement'],
-	PvCurrent: ['Adc', 'current-dc', 'current', 'measurement'],
+	PvVoltage: ['V', 'current-dc', 'voltage', 'measurement'],
+	PvCurrent: ['A', 'current-dc', 'current', 'measurement'],
 	PvPower: ['Wh', 'solar-power', 'power', 'measurement'],
 	BatteryState: ['', 'car-battery', 'enum', 'measurement'],
-	BatteryClass: ['', 'car-battery'],
-	BatteryVoltage: ['Vdc', 'current-dc', 'voltage', 'measurement'],
-	BatteryCurrent: ['Adc', 'current-dc', 'current', 'measurement'],
+	BatteryClass: ['', 'car-battery', 'voltage', 'measurement'],
+	BatteryVoltage: ['V', 'current-dc', 'voltage', 'measurement'],
+	BatteryCurrent: ['A', 'current-dc', 'current', 'measurement'],
 	BatteryPower: ['Wh', 'current-dc', 'power', 'measurement'],
 	BatteryTemperature: ['°C', 'thermometer', 'temperature', 'measurement'],
 	BatterySocPercent: ['%', 'battery-medium', 'battery', 'measurement'],
 	GridCharge: ['', 'transmission-tower', 'enum', 'measurement'],
 	GridState: ['', 'transmission-tower', 'enum', 'measurement'],
-	GridVoltage: ['Vac', 'current-ac', 'voltage', 'measurement'],
+	GridVoltage: ['V', 'current-ac', 'voltage', 'measurement'],
 	GridPower: ['Wh', 'current-ac', 'power', 'measurement'],
 	GridFrequency: ['Hz', 'sine-wave', 'frequency', 'measurement'],
-	L1Voltage: ['Vac', 'current-ac', 'voltage', 'measurement'],
-	L1Current: ['Aac', 'current-ac', 'current', 'measurement'],
+	L1Voltage: ['V', 'current-ac', 'voltage', 'measurement'],
+	L1Current: ['A', 'current-ac', 'current', 'measurement'],
 	L1Power: ['Wh', 'current-ac', 'power', 'measurement'],
 	L1VoltageCurrent: ['VA', 'lightbulb-on-outline', 'apparent_power', 'measurement'],
 	L1LoadPercent: ['%', 'power-plug', 'power_factor', 'measurement'],
@@ -144,7 +144,7 @@ const ValuesConfig = {
 	L2Power: ['Wh', 'current-ac', 'power', 'measurement'],
 	L2VoltageCurrent: ['VA', 'lightbulb-on-outline', 'apparent_power', 'measurement'],
 	L2LoadPercent: ['%', 'power-plug', 'power_factor', 'measurement'],
-	OutputVoltage: ['Vac', 'current-ac', 'voltage', 'measurement'],
+	OutputVoltage: ['V', 'current-ac', 'voltage', 'measurement'],
 	OutputFrequency: ['Hz', 'sine-wave', 'frequency', 'measurement'],
 	OutputPower: ['Wh', 'current-ac', 'power', 'measurement'],
 	OutputVoltageCurrent: ['VC', 'power-plug', 'current', 'measurement'],
