@@ -207,7 +207,7 @@ const ValuesConfig = {
 	},
 	BatteryPower: {
 		unit_of_measurement: 'Wh',
-		icon: 'mdi:current-dc',
+		icon: 'mdi:home-battery',
 		device_class: 'energy',
 		state_class: 'total_increasing'
 	},
@@ -328,7 +328,7 @@ const ValuesConfig = {
 	},
 	OutputPower: {
 		unit_of_measurement: 'Wh',
-		icon: 'mdi:current-ac',
+		icon: 'mdi:power-plug',
 		device_class: 'energy',
 		state_class: 'total_increasing'
 	},
