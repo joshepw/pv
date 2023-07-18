@@ -178,7 +178,7 @@ const ValuesConfig = {
 		unit_of_measurement: 'Wh',
 		icon: 'mdi:solar-power',
 		device_class: 'energy',
-		state_class: 'measurement',
+		state_class: 'total_increasing',
 	},
 	BatteryState: {
 		unit_of_measurement: '',
@@ -209,7 +209,7 @@ const ValuesConfig = {
 		unit_of_measurement: 'Wh',
 		icon: 'mdi:current-dc',
 		device_class: 'energy',
-		state_class: 'measurement'
+		state_class: 'total_increasing'
 	},
 	BatteryTemperature: {
 		unit_of_measurement: '°C',
@@ -244,9 +244,9 @@ const ValuesConfig = {
 	},
 	GridPower: {
 		unit_of_measurement: 'Wh',
-		icon: 'mdi:current-ac',
+		icon: 'mdi:transmission-tower',
 		device_class: 'energy',
-		state_class: 'measurement'
+		state_class: 'total_increasing'
 	},
 	GridFrequency: {
 		unit_of_measurement: 'Hz',
@@ -330,7 +330,7 @@ const ValuesConfig = {
 		unit_of_measurement: 'Wh',
 		icon: 'mdi:current-ac',
 		device_class: 'energy',
-		state_class: 'measurement'
+		state_class: 'total_increasing'
 	},
 	OutputVoltageCurrent: {
 		unit_of_measurement: 'VC',
