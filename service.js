@@ -8,7 +8,6 @@ const Helpers = require('./helpers');
 const ModbusRTU = require('modbus-serial');
 const Models = require('./models');
 
-const seconds_interval = 5;
 let lapsedSeconds = 0;
 let consumption = 0;
 let systemFault = null;
@@ -47,7 +46,7 @@ const onSendData = (values) => {
 		systemFault = values.DeviceSystemFault;
 	}
 
-	consumption = (values.OutputPower / (3600 / seconds_interval)) + consumption;
+	consumption += values.AccumulatedOutputPower;
 
 	if (lapsedSeconds > 59) {
 		onLapsedMinute(values);
@@ -96,22 +95,20 @@ const readADCValues = async () => {
  */
 const connectToSerial = () => {
 	(async () => {
-		const timeout = 10;
-
 		while (!client_status.mbus_connected) {
 			try {
 				const modbus = new ModbusRTU();
-				const interval = seconds_interval * 1000;
+				const interval = Config.Serial.interval * 1000;
 
 				if (!fs.existsSync(Config.Serial.port)) {
-					throw new Error(`The port is not available, will be try again in ${timeout}s ...`);
+					throw new Error(`The port is not available, will be try again in ${Config.Serial.timeout}s ...`);
 				}
 
 				console.log(`[MBUS] ${new Date()} - Connected to ${Config.Serial.port}`);
 				client_status.mbus_connected = true;
 
 				modbus.connectRTUBuffered(Config.Serial.port, Config.Serial.config);
-				modbus.setTimeout(timeout * 1000);
+				modbus.setTimeout(Config.Serial.timeout * 1000);
 				modbus.setID(10);
 
 				setInterval(async () => {
@@ -122,14 +119,14 @@ const connectToSerial = () => {
 
 						onSendData(new Models.Values(config, values, pv));
 					} catch (error) {
-						console.warn(`[MBUS] ${new Date()} - ${error}`);		
+						console.warn(`[MBUS] ${new Date()} - ${error}`);
 					}
 				}, interval);
 			} catch (error) {
 				client_status.mbus_connected = false;
 				console.warn(`[MBUS] ${new Date()} - ${error}`);
 
-				await Helpers.Sleep(timeout * 1000);
+				await Helpers.Sleep(Config.Serial.timeout * 1000);
 			}
 		}
 	})();

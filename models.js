@@ -1,3 +1,4 @@
+const Config = require('./config');
 const Helpers = require('./helpers');
 
 class Values {
@@ -57,6 +58,11 @@ class Values {
 		this.OutputPower = Helpers.ParseSignedValue(values[18]);
 		this.OutputVoltageCurrent = Helpers.ParseSignedValue(values[19]);
 		this.OutputLoadPercent = Helpers.ParseValue(values[20]);
+
+		this.AccumulatedPvPower = this.PvPower / (3600 / Config.Serial.interval);
+		this.AccumulatedBatteryPower = this.BatteryPower / (3600 / Config.Serial.interval);
+		this.AccumulatedGridPower = this.GridPower / (3600 / Config.Serial.interval);
+		this.AccumulatedOutputPower = this.OutputPower / (3600 / Config.Serial.interval);
 	}
 }
 
@@ -126,7 +132,7 @@ const ValuesConfig = {
 		icon: 'mdi:counter'
 	},
 	DeviceRatedPower: {
-		unit_of_measurement: 'Wh',
+		unit_of_measurement: 'W',
 		icon: 'mdi:lightbulb-outline'
 	},
 	DeviceRadiatorTemperature: {
@@ -175,10 +181,10 @@ const ValuesConfig = {
 		state_class: 'measurement'
 	},
 	PvPower: {
-		unit_of_measurement: 'Wh',
+		unit_of_measurement: 'W',
 		icon: 'mdi:solar-power',
-		device_class: 'energy',
-		state_class: 'total_increasing',
+		device_class: 'power',
+		state_class: 'measurement',
 	},
 	BatteryState: {
 		unit_of_measurement: '',
@@ -206,10 +212,10 @@ const ValuesConfig = {
 		state_class: 'measurement'
 	},
 	BatteryPower: {
-		unit_of_measurement: 'Wh',
-		icon: 'mdi:home-battery',
-		device_class: 'energy',
-		state_class: 'total_increasing'
+		unit_of_measurement: 'W',
+		icon: 'mdi:car-battery',
+		device_class: 'power',
+		state_class: 'measurement'
 	},
 	BatteryTemperature: {
 		unit_of_measurement: '°C',
@@ -243,10 +249,10 @@ const ValuesConfig = {
 		state_class: 'measurement'
 	},
 	GridPower: {
-		unit_of_measurement: 'Wh',
+		unit_of_measurement: 'W',
 		icon: 'mdi:transmission-tower',
-		device_class: 'energy',
-		state_class: 'total_increasing'
+		device_class: 'power',
+		state_class: 'measurement'
 	},
 	GridFrequency: {
 		unit_of_measurement: 'Hz',
@@ -267,7 +273,7 @@ const ValuesConfig = {
 		state_class: 'measurement'
 	},
 	L1Power: {
-		unit_of_measurement: 'Wh',
+		unit_of_measurement: 'W',
 		icon: 'mdi:current-ac',
 		device_class: 'power',
 		state_class: 'measurement'
@@ -297,7 +303,7 @@ const ValuesConfig = {
 		state_class: 'measurement'
 	},
 	L2Power: {
-		unit_of_measurement: 'Wh',
+		unit_of_measurement: 'W',
 		icon: 'mdi:current-ac',
 		device_class: 'power',
 		state_class: 'measurement'
@@ -327,10 +333,10 @@ const ValuesConfig = {
 		state_class: 'measurement'
 	},
 	OutputPower: {
-		unit_of_measurement: 'Wh',
+		unit_of_measurement: 'W',
 		icon: 'mdi:power-plug',
-		device_class: 'energy',
-		state_class: 'total_increasing'
+		device_class: 'power',
+		state_class: 'measurement'
 	},
 	OutputVoltageCurrent: {
 		unit_of_measurement: 'VC',
@@ -343,6 +349,31 @@ const ValuesConfig = {
 		icon: 'mdi:power-plug',
 		device_class: 'power_factor',
 		state_class: 'measurement'
+	},
+
+	AccumulatedPvPower: {
+		unit_of_measurement: 'Wh',
+		icon: 'mdi:solar-power',
+		device_class: 'energy',
+		state_class: 'total_increasing',
+	},
+	AccumulatedBatteryPower: {
+		unit_of_measurement: 'Wh',
+		icon: 'mdi:home-battery',
+		device_class: 'energy',
+		state_class: 'total_increasing'
+	},
+	AccumulatedGridPower: {
+		unit_of_measurement: 'Wh',
+		icon: 'mdi:transmission-tower',
+		device_class: 'energy',
+		state_class: 'total_increasing'
+	},
+	AccumulatedOutputPower: {
+		unit_of_measurement: 'Wh',
+		icon: 'mdi:power-plug',
+		device_class: 'energy',
+		state_class: 'total_increasing'
 	},
 };
 

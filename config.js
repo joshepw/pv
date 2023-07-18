@@ -6,6 +6,8 @@ exports.Serial = {
 		parity: 'none',
 		autoOpen: false
 	},
+	timeout: 10,
+	interval: 5,
 };
 
 exports.MQTT = {
