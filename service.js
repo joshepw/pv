@@ -60,6 +60,7 @@ const onSendData = (values) => {
 	}
 
 	Object.keys(Models.ValuesConfig).forEach(key => {
+		sendProbeSensorConfig(key);
 		client.publish(`homeassistant/sensor/must-inverter/${key}`, `${values[key]}`);
 	});
 };
@@ -146,25 +147,34 @@ const onLapsedMinute = function (values) {
 	db.run(`INSERT INTO battery (percent, temp, state) VALUES (${values.BatterySocPercent}, ${values.BatteryTemperature}, "${values.BatteryState}")`);
 };
 
+/**
+ * Send MQTT Probe sensor config
+ * 
+ * @param {string} key 
+ */
+const sendProbeSensorConfig = (key) => {
+	const payload = {
+		device: {
+			identifiers: ['must-inverter_PV3300TLV'],
+			manufacturer: 'Must',
+			model: 'PV3300TLV',
+			name: 'Hybrid Solar Inverter',
+		},
+		name: key.split(/(?=[A-Z])/).join(' '),
+		state_topic: `homeassistant/sensor/must-inverter/${key}`,
+		unique_id: `must-inverter_${key}_${key.hashCode()}`,
+		...Models.ValuesConfig[key],
+	};
+
+	client.publish(`homeassistant/sensor/must-inverter/${key}/config`, JSON.stringify(payload));
+};
+
 client.on('connect', () => {
 	client_status.mqtt_connected = true;
 	console.log(`[MQTT] ${new Date()} - Connected to ${Config.MQTT.host}`);
 
 	Object.keys(Models.ValuesConfig).forEach(key => {
-		const payload = {
-			device: {
-				identifiers: ['must-inverter_PV3300TLV'],
-				manufacturer: 'Must',
-				model: 'PV3300TLV',
-				name: 'Hybrid Solar Inverter',
-			},
-			name: key.split(/(?=[A-Z])/).join(' '),
-			state_topic: `homeassistant/sensor/must-inverter/${key}`,
-			unique_id: `must-inverter_${key}_${key.hashCode()}`,
-			...Models.ValuesConfig[key],
-		};
-
-		client.publish(`homeassistant/sensor/must-inverter/${key}/config`, JSON.stringify(payload));
+		sendProbeSensorConfig(key);
 	});
 
 	try {
