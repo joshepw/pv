@@ -59,10 +59,19 @@ class Values {
 		this.OutputVoltageCurrent = Helpers.ParseSignedValue(values[19]);
 		this.OutputLoadPercent = Helpers.ParseValue(values[20]);
 
-		this.AccumulatedPvPower = this.PvPower;
-		this.AccumulatedBatteryPower = this.BatteryPower;
-		this.AccumulatedGridPower = this.GridPower;
-		this.AccumulatedOutputPower = this.OutputPower;
+		this.AccumulatedPvPower = 0;
+		this.AccumulatedBatteryPower = 0;
+		this.AccumulatedGridPower = 0;
+		this.AccumulatedOutputPower = 0;
+	}
+}
+
+class AccumulatedValues {
+	constructor() {
+		this.PvPower = 0;
+		this.BatteryPower = 0;
+		this.GridPower = 0;
+		this.OutputPower = 0;
 	}
 }
 
@@ -384,3 +393,4 @@ exports.GridState = GridState;
 exports.FaultCodes = FaultCodes;
 exports.Values = Values;
 exports.ValuesConfig = ValuesConfig;
+exports.AccumulatedValues = AccumulatedValues;

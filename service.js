@@ -8,6 +8,8 @@ const Helpers = require('./helpers');
 const ModbusRTU = require('modbus-serial');
 const Models = require('./models');
 
+const accumulated = new Models.AccumulatedValues();
+
 let lapsedSeconds = 0;
 let consumption = 0;
 let systemFault = null;
@@ -37,6 +39,22 @@ const client_status = {
 };
 
 /**
+ * 
+ * @param {Models.Values} values 
+ */
+const calculateAccumulativeData = (values) => {
+	accumulated.BatteryPower += (values.BatteryPower / (3600 / Config.Serial.interval));
+	accumulated.GridPower += (values.GridPower / (3600 / Config.Serial.interval));
+	accumulated.OutputPower += (values.OutputPower / (3600 / Config.Serial.interval));
+	accumulated.PvPower += (values.PvPower / (3600 / Config.Serial.interval));
+
+	values.AccumulatedBatteryPower = accumulated.BatteryPower;
+	values.AccumulatedGridPower = accumulated.GridPower;
+	values.AccumulatedOutputPower = accumulated.OutputPower;
+	values.AccumulatedPvPower = accumulated.PvPower;
+};
+
+/**
  * Send data to services
  * 
  * @param {Models.Values} values 
@@ -46,7 +64,7 @@ const onSendData = (values) => {
 		systemFault = values.DeviceSystemFault;
 	}
 
-	consumption = (values.OutputPower / (3600 / Config.Serial.interval)) + consumption;
+	consumption += (values.OutputPower / (3600 / Config.Serial.interval));
 
 	if (lapsedSeconds > 59) {
 		onLapsedMinute(values);
@@ -57,6 +75,8 @@ const onSendData = (values) => {
 	} else {
 		lapsedSeconds++;
 	}
+
+	calculateAccumulativeData(values);
 
 	Object.keys(Models.ValuesConfig).forEach(key => {
 		sendProbeSensorConfig(key);
