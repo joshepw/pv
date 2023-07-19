@@ -59,10 +59,10 @@ class Values {
 		this.OutputVoltageCurrent = Helpers.ParseSignedValue(values[19]);
 		this.OutputLoadPercent = Helpers.ParseValue(values[20]);
 
-		this.AccumulatedPvPower = (this.PvPower / (3600 / Config.Serial.interval)).toFixed(2);
-		this.AccumulatedBatteryPower = (this.BatteryPower / (3600 / Config.Serial.interval)).toFixed(2);
-		this.AccumulatedGridPower = (this.GridPower / (3600 / Config.Serial.interval)).toFixed(2);
-		this.AccumulatedOutputPower = (this.OutputPower / (3600 / Config.Serial.interval)).toFixed(2);
+		this.AccumulatedPvPower = this.PvPower;
+		this.AccumulatedBatteryPower = this.BatteryPower;
+		this.AccumulatedGridPower = this.GridPower;
+		this.AccumulatedOutputPower = this.OutputPower;
 	}
 }
 

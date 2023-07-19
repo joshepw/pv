@@ -46,7 +46,7 @@ const onSendData = (values) => {
 		systemFault = values.DeviceSystemFault;
 	}
 
-	consumption += values.AccumulatedOutputPower;
+	consumption = (values.OutputPower / (3600 / Config.Serial.interval)) + consumption;
 
 	if (lapsedSeconds > 59) {
 		onLapsedMinute(values);
