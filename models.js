@@ -1,4 +1,3 @@
-const Config = require('./config');
 const Helpers = require('./helpers');
 
 class Values {
@@ -22,10 +21,10 @@ class Values {
 		this.PvCurrent = pv.current.toFixed(2);
 		this.PvPower = pv.power.toFixed(2);
 
-		this.BatteryState = BatteryState[config[2] == 1 ? 1 : 0];
+		this.BatteryState = BatteryState[config[2] == 1 ? 2 : 0];
 
 		if (pv.power > 2 || Boolean(config[24])) {
-			this.BatteryState = BatteryState[3];
+			this.BatteryState = this.BatteryState == BatteryState[2] ? BatteryState[1] : BatteryState[3];
 		}
 
 		this.BatteryClass = Helpers.ParseValue(config[3]);
