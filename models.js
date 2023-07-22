@@ -2,42 +2,42 @@ const Helpers = require('./helpers');
 
 class Values {
 	constructor(config, values, pv) {
-		this.DeviceWorkState = WorkState[config[2]];
+		this.DeviceWorkState = config[2];
 		this.DeviceMachineType = config[0];
 		this.DeviceSoftwareVersion = config[1];
 		this.DeviceRatedPower = Helpers.ParseValue(config[4]);
 		this.DeviceRadiatorTemperature = Helpers.ParseValue(config[18]);
 		this.DeviceTransformerTemperature = Helpers.ParseValue(config[19]);
-		this.DeviceBuzzerState = BuzzerState[config[20]];
-		this.DeviceSystemFault = FaultCodes[config[21]] || 'None';
+		this.DeviceBuzzerState = config[20];
+		this.DeviceSystemFault = FaultCodes[config[21]] || '';
 
-		this.PvState = pv.voltage > 5 ? PvState[1] : PvState[2];
+		this.PvState = pv.voltage > 5 ? 1 : 2;
 
 		if (pv.power > 2) {
-			this.PvState = PvState[0];
+			this.PvState = 0;
 		}
 
 		this.PvVoltage = pv.voltage.toFixed(2);
 		this.PvCurrent = pv.current.toFixed(2);
 		this.PvPower = pv.power.toFixed(2);
 
-		this.BatteryState = BatteryState[config[2] == 1 ? 2 : 0];
+		this.BatteryState = this.DeviceWorkState == 1 ? 2 : 0;
 
 		if (pv.power > 2 || Boolean(config[24])) {
-			this.BatteryState = this.BatteryState == BatteryState[2] ? BatteryState[1] : BatteryState[3];
+			this.BatteryState = this.BatteryState == 2 ? 1 : 3;
 		}
 
 		this.BatteryClass = Helpers.ParseValue(config[3]);
 		this.BatteryVoltage = Helpers.ParseValue(config[14], 0.1);
 		this.BatteryCurrent = Helpers.ParseSignedValue(config[15], 0.1);
-		this.BatteryPower = this.GridPower = config[2] == 1 ? Helpers.ParseSignedValue(values[18]) : 0;
+		this.BatteryPower = this.GridPower = this.DeviceWorkState == 1 ? Helpers.ParseSignedValue(values[18]) : 0;
 		this.BatteryTemperature = Helpers.ParseSignedValue(config[16]);
 		this.BatterySocPercent = Helpers.ParseSignedValue(config[17]);
 
 		this.GridCharge = Boolean(config[24]);
-		this.GridState = GridState[config[25]];
+		this.GridState = config[25];
 		this.GridVoltage = Helpers.ParseValue(values[2], 0.1);
-		this.GridPower = config[2] == 2 ? Helpers.ParseSignedValue(values[18]) : 0;
+		this.GridPower = this.DeviceWorkState == 2 ? Helpers.ParseSignedValue(values[18]) : 0;
 		this.GridFrequency = Helpers.ParseValue(values[3], 0.1);
 
 		this.L1Voltage = Helpers.ParseValue(values[6], 0.1);
@@ -128,7 +128,6 @@ const ValuesConfig = {
 		unit_of_measurement: '',
 		icon: 'mdi:state-machine',
 		device_class: 'enum',
-		state_class: 'measurement',
 		options: WorkState
 	},
 	DeviceMachineType: {
@@ -159,21 +158,17 @@ const ValuesConfig = {
 		unit_of_measurement: '',
 		icon: 'mdi:bullhorn',
 		device_class: 'enum',
-		state_class: 'measurement',
 		options: BuzzerState
 	},
 	DeviceSystemFault: {
 		unit_of_measurement: '',
 		icon: 'mdi:alert-circle-outline',
-		device_class: 'enum',
-		state_class: 'measurement',
-		options: Object.values(FaultCodes)
+		entity_category: 'diagnostic'
 	},
 	PvState: {
 		unit_of_measurement: '',
 		icon: 'mdi:solar-panel',
 		device_class: 'enum',
-		state_class: 'measurement',
 		options: PvState
 	},
 	PvVoltage: {
@@ -198,7 +193,6 @@ const ValuesConfig = {
 		unit_of_measurement: '',
 		icon: 'mdi:car-battery',
 		device_class: 'enum',
-		state_class: 'measurement',
 		options: BatteryState
 	},
 	BatteryClass: {
@@ -240,14 +234,11 @@ const ValuesConfig = {
 	GridCharge: {
 		unit_of_measurement: '',
 		icon: 'mdi:transmission-tower',
-		device_class: 'enum',
-		state_class: 'measurement',
 	},
 	GridState: {
 		unit_of_measurement: '',
 		icon: 'mdi:transmission-tower',
 		device_class: 'enum',
-		state_class: 'measurement',
 		options: GridState
 	},
 	GridVoltage: {
@@ -347,7 +338,7 @@ const ValuesConfig = {
 		state_class: 'measurement'
 	},
 	OutputVoltageCurrent: {
-		unit_of_measurement: 'VC',
+		unit_of_measurement: 'VA',
 		icon: 'mdi:power-plug',
 		device_class: 'current',
 		state_class: 'measurement'
