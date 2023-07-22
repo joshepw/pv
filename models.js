@@ -163,6 +163,7 @@ const ValuesConfig = {
 	DeviceSystemFault: {
 		unit_of_measurement: '',
 		icon: 'mdi:alert-circle-outline',
+		device_class: 'enum',
 		entity_category: 'diagnostic'
 	},
 	PvState: {
