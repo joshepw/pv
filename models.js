@@ -2,42 +2,42 @@ const Helpers = require('./helpers');
 
 class Values {
 	constructor(config, values, pv) {
-		this.DeviceWorkState = config[2];
+		this.DeviceWorkState = WorkState[config[2]];
 		this.DeviceMachineType = config[0];
 		this.DeviceSoftwareVersion = config[1];
 		this.DeviceRatedPower = Helpers.ParseValue(config[4]);
 		this.DeviceRadiatorTemperature = Helpers.ParseValue(config[18]);
 		this.DeviceTransformerTemperature = Helpers.ParseValue(config[19]);
-		this.DeviceBuzzerState = config[20];
-		this.DeviceSystemFault = FaultCodes[config[21]] || '';
+		this.DeviceBuzzerState = BuzzerState[config[20]];
+		this.DeviceSystemFault = FaultCodes[config[21]] || 'None';
 
-		this.PvState = pv.voltage > 5 ? 1 : 2;
+		this.PvState = pv.voltage > 5 ? PvState[1] : PvState[2];
 
 		if (pv.power > 2) {
-			this.PvState = 0;
+			this.PvState = PvState[0];
 		}
 
 		this.PvVoltage = pv.voltage.toFixed(2);
 		this.PvCurrent = pv.current.toFixed(2);
 		this.PvPower = pv.power.toFixed(2);
 
-		this.BatteryState = this.DeviceWorkState == 1 ? 2 : 0;
+		this.BatteryState = BatteryState[config[2] == 1 ? 2 : 0];
 
 		if (pv.power > 2 || Boolean(config[24])) {
-			this.BatteryState = this.BatteryState == 2 ? 1 : 3;
+			this.BatteryState = this.BatteryState == BatteryState[2] ? BatteryState[1] : BatteryState[3];
 		}
 
 		this.BatteryClass = Helpers.ParseValue(config[3]);
 		this.BatteryVoltage = Helpers.ParseValue(config[14], 0.1);
 		this.BatteryCurrent = Helpers.ParseSignedValue(config[15], 0.1);
-		this.BatteryPower = this.GridPower = this.DeviceWorkState == 1 ? Helpers.ParseSignedValue(values[18]) : 0;
+		this.BatteryPower = this.GridPower = config[2] == 1 ? Helpers.ParseSignedValue(values[18]) : 0;
 		this.BatteryTemperature = Helpers.ParseSignedValue(config[16]);
 		this.BatterySocPercent = Helpers.ParseSignedValue(config[17]);
 
 		this.GridCharge = Boolean(config[24]);
-		this.GridState = config[25];
+		this.GridState = GridState[config[25]];
 		this.GridVoltage = Helpers.ParseValue(values[2], 0.1);
-		this.GridPower = this.DeviceWorkState == 2 ? Helpers.ParseSignedValue(values[18]) : 0;
+		this.GridPower = config[2] == 2 ? Helpers.ParseSignedValue(values[18]) : 0;
 		this.GridFrequency = Helpers.ParseValue(values[3], 0.1);
 
 		this.L1Voltage = Helpers.ParseValue(values[6], 0.1);
