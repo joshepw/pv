@@ -14,6 +14,12 @@ let lapsedSeconds = 0;
 let consumption = 0;
 let systemFault = null;
 
+let pv_data = {
+	voltage: 0,
+	current: 0,
+	power: 0,
+};
+
 String.prototype.hashCode = function () {
 	var hash = 0,
 		i, chr;
@@ -132,12 +138,17 @@ const connectToSerial = () => {
 				modbus.setID(10);
 
 				setInterval(async () => {
+					readADCValues().then(data => {
+						pv_data = data;
+					}).catch(err => {
+						console.warn(`[I2C] ${new Date()} - ${err}`);
+					});
+
 					try {
 						const config = (await modbus.readHoldingRegisters(30000, 27)).data;
 						const values = (await modbus.readHoldingRegisters(30030, 30)).data;
-						const pv = await readADCValues();
 
-						onSendData(new Models.Values(config, values, pv));
+						onSendData(new Models.Values(config, values, pv_data));
 					} catch (error) {
 						console.warn(`[MBUS] ${new Date()} - ${error}`);
 					}
