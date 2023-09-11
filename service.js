@@ -48,6 +48,18 @@ const i2c_data = {
 };
 
 /**
+ * Sleep helper function
+ * 
+ * @param {Number} ms 
+ * @returns 
+ */
+function sleep(ms) {
+	return new Promise((resolve) => {
+		setTimeout(resolve, ms);
+	});
+}
+
+/**
  * 
  * @param {Models.Values} values 
  */
