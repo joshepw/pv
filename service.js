@@ -38,15 +38,6 @@ const client_status = {
 	mbus_connected: false,
 };
 
-const i2c_data = {
-	pv: {
-		voltage: 0,
-		current: 0,
-		power: 0,
-	},
-	busy: false,
-};
-
 /**
  * Sleep helper function
  * 
@@ -115,9 +106,7 @@ const readADCValues = async () => {
 
 	// measure / 1e3
 	const measure_adc_current = (await adc.readSingleEnded({ channel: 0 })) / 1e3;
-	await sleep(1000);
 	const measure_adc_vcc = (await adc.readSingleEnded({ channel: 1 })) / 1e3;
-	await sleep(1000);
 	const measure_adc_voltage = (await adc.readSingleEnded({
 		channelPositive: 2,
 		channelNegative: 3,
@@ -156,23 +145,12 @@ const connectToSerial = () => {
 				modbus.setID(10);
 
 				setInterval(async () => {
-					if (!i2c_data.busy) {
-						i2c_data.busy = true;
-
-						readADCValues().then(data => {
-							pv_data = data;
-							i2c_data.busy = false;
-						}).catch(err => {
-							console.warn(`[I2C] ${new Date()} - ${err}`);
-							i2c_data.busy = false;
-						});
-					}
-
 					try {
 						const config = (await modbus.readHoldingRegisters(30000, 27)).data;
 						const values = (await modbus.readHoldingRegisters(30030, 30)).data;
+						const pv = await readADCValues();
 
-						onSendData(new Models.Values(config, values, i2c_data.pv));
+						onSendData(new Models.Values(config, values, pv));
 					} catch (error) {
 						console.warn(`[MBUS] ${new Date()} - ${error}`);
 					}
