@@ -162,6 +162,8 @@ client.on('connect', () => {
 	Object.keys(Models.ValuesConfig).forEach(key => {
 		sendProbeSensorConfig(key);
 	});
+
+	connectToSerial();
 });
 
 client.on('close', () => {
