@@ -8,10 +8,6 @@ const Models = require('./models');
 
 const accumulated = new Models.AccumulatedValues();
 
-let lapsedSeconds = 0;
-let consumption = 0;
-let systemFault = null;
-
 String.prototype.hashCode = function () {
 	var hash = 0,
 		i, chr;
@@ -58,18 +54,6 @@ const calculateAccumulativeData = (values) => {
 const onSendData = (values) => {
 	if (values.DeviceSystemFault != 'None') {
 		systemFault = values.DeviceSystemFault;
-	}
-
-	consumption += (values.OutputPower / (3600 / Config.Serial.interval));
-
-	if (lapsedSeconds > 59) {
-		onLapsedMinute(values);
-
-		lapsedSeconds = 0;
-		consumption = 0;
-		systemFault = null;
-	} else {
-		lapsedSeconds++;
 	}
 
 	calculateAccumulativeData(values);
