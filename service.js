@@ -1,8 +1,6 @@
 const process = require('process');
 const mqtt = require('mqtt');
 const fs = require('fs');
-const ads1x15 = require('ads1x15');
-const sqlite3 = require('sqlite3');
 const Config = require('./config');
 const Helpers = require('./helpers');
 const ModbusRTU = require('modbus-serial');
@@ -26,8 +24,6 @@ String.prototype.hashCode = function () {
 	return Buffer.from(`${hash}`).toString('base64');
 }
 
-const db = new sqlite3.Database('historical.db');
-
 const client = mqtt.connect(`mqtt://${Config.MQTT.host}`, {
 	username: Config.MQTT.user,
 	password: Config.MQTT.pass,
@@ -37,18 +33,6 @@ const client_status = {
 	mqtt_connected: false,
 	mbus_connected: false,
 };
-
-/**
- * Sleep helper function
- * 
- * @param {Number} ms 
- * @returns 
- */
-function sleep(ms) {
-	return new Promise((resolve) => {
-		setTimeout(resolve, ms);
-	});
-}
 
 /**
  * 
@@ -100,26 +84,10 @@ const onSendData = (values) => {
  * Get ADC converter values 
  */
 const readADCValues = async () => {
-	const adc = new ads1x15(0x01);
-	await adc.openBus(1);
-	await sleep(1000);
-
-	// measure / 1e3
-	const measure_adc_current = (await adc.readSingleEnded({ channel: 0 })) / 1e3;
-	const measure_adc_vcc = (await adc.readSingleEnded({ channel: 1 })) / 1e3;
-	const measure_adc_voltage = (await adc.readSingleEnded({
-		channelPositive: 2,
-		channelNegative: 3,
-	})) / 1e3;
-
-	const voltage = measure_adc_voltage * 100;
-	const current = (measure_adc_current - measure_adc_vcc) * 100;
-	const power = (voltage * current) / 2;
-
 	return {
-		voltage,
-		current: current > 1 ? current : 0,
-		power: power > 1 ? power : 0
+		voltage: 0,
+		current: 0,
+		power: 0,
 	};
 };
 
@@ -166,18 +134,6 @@ const connectToSerial = () => {
 };
 
 /**
- * @param {Models.Values} values 
- */
-const onLapsedMinute = function (values) {
-	if (systemFault != 'None') {
-		db.run(`INSERT INTO faults (message) VALUES ("${systemFault}")`);
-	}
-
-	db.run(`INSERT INTO consumption (power, state) VALUES (${consumption}, "${values.DeviceWorkState}")`);
-	db.run(`INSERT INTO battery (percent, temp, state) VALUES (${values.BatterySocPercent}, ${values.BatteryTemperature}, "${values.BatteryState}")`);
-};
-
-/**
  * Send MQTT Probe sensor config
  * 
  * @param {string} key 
@@ -206,16 +162,6 @@ client.on('connect', () => {
 	Object.keys(Models.ValuesConfig).forEach(key => {
 		sendProbeSensorConfig(key);
 	});
-
-	try {
-		db.run('CREATE TABLE IF NOT EXISTS "battery" ("id" integer,"percent" int,"temp" int,"state" varchar, "timestamp" DATE DEFAULT (datetime(\'now\',\'localtime\')), PRIMARY KEY (id));');
-		db.run('CREATE TABLE IF NOT EXISTS "consumption" ("id" integer,"power" int,"state" varchar,"timestamp" DATE DEFAULT (datetime(\'now\',\'localtime\')), PRIMARY KEY (id));');
-		db.run('CREATE TABLE IF NOT EXISTS "faults" ("id" integer,"message" varchar, "timestamp" DATE DEFAULT (datetime(\'now\',\'localtime\')), PRIMARY KEY (id));');
-
-		connectToSerial();
-	} catch (e) {
-		console.log(e)
-	}
 });
 
 client.on('close', () => {
