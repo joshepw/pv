@@ -58,14 +58,14 @@ class Values {
 		this.OutputVoltageCurrent = Helpers.ParseSignedValue(values[19]);
 		this.OutputLoadPercent = Helpers.ParseValue(values[20]);
 		
-		this.OutputSource = "Unknow";
+		this.OutputSource = OutputSources[3];
 
 		if (this.DeviceWorkState == WorkState[1]) {
-			this.OutputSource = pv.power > 100 ? "Solar" : "Battery";
+			this.OutputSource = (pv.power > 100) ? OutputSources[2] : OutputSources[1];
 		}
 
 		if (this.DeviceWorkState == WorkState[2]) {
-			this.OutputSource = "Grid"
+			this.OutputSource = OutputSources[0];
 		}
 
 		this.AccumulatedPvPower = 0;
@@ -86,6 +86,13 @@ class AccumulatedValues {
 		this.OutputPower = 0;
 	}
 }
+
+const OutputSources = [
+	"Grid",
+	"Battery",
+	"Solar",
+	"Unknown",
+];
 
 const WorkState = [
 	"Self Check",
@@ -366,6 +373,8 @@ const ValuesConfig = {
 	OutputSource: {
 		unit_of_measurement: '',
 		icon: 'mdi:power-plug',
+		device_class: 'enum',
+		options: WorkState
 	},
 
 	AccumulatedPvPower: {

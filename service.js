@@ -57,10 +57,6 @@ const calculateAccumulativeData = (values) => {
  * @param {Models.Values} values 
  */
 const onSendData = (values) => {
-	if (values.DeviceSystemFault != 'None') {
-		systemFault = values.DeviceSystemFault;
-	}
-
 	calculateAccumulativeData(values);
 
 	Object.keys(Models.ValuesConfig).forEach(key => {
