@@ -169,8 +169,8 @@ client.on("message", (topic, message) => {
 		const data = message.toString();
 		const json = JSON.parse(data);
 
-		client_status.pv_data.current = json.current || 0;
-		client_status.pv_data.power = json.power || 0;
-		client_status.pv_data.voltage = json.voltage || 0;
+		client_status.pv_data.current = parseFloat(json.current || 0);
+		client_status.pv_data.power = parseFloat(json.power || 0);
+		client_status.pv_data.voltage = parseFloat(json.voltage || 0);
 	}
 });
