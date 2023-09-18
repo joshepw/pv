@@ -152,7 +152,7 @@ client.on('connect', () => {
 	});
 
 	client.subscribe(Config.MQTT.topics.inverter, (err) => {
-		console.log(`[MQTT] ${new Date()} - Error to subscribe ${Config.MQTT.topics.inverter}: ${err}`)
+		if (err) console.warn(`[MQTT] ${new Date()} - Error to subscribe ${Config.MQTT.topics.inverter}: ${err}`);
 	});
 
 	connectToSerial();
@@ -160,6 +160,7 @@ client.on('connect', () => {
 
 client.on('close', () => {
 	client_status.mqtt_connected = false;
+	console.warn(`[MQTT] ${new Date()} - Close connection`);
 	process.exit(1);
 });
 
@@ -172,6 +173,4 @@ client.on("message", (topic, message) => {
 		client_status.pv_data.power = json.power || 0;
 		client_status.pv_data.voltage = json.voltage || 0;
 	}
-
-	client.end();
 });
