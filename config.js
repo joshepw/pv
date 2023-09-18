@@ -11,7 +11,7 @@ exports.Serial = {
 };
 
 exports.MQTT = {
-	host: 'home.local',
+	host: '10.147.1.79',
 	user: 'joshepw',
 	pass: 'codelyoko',
 	topics: {
