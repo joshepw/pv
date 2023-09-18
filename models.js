@@ -57,11 +57,24 @@ class Values {
 		this.OutputPower = Helpers.ParseSignedValue(values[18]);
 		this.OutputVoltageCurrent = Helpers.ParseSignedValue(values[19]);
 		this.OutputLoadPercent = Helpers.ParseValue(values[20]);
+		
+		this.OutputSource = "Unknow";
+
+		if (this.DeviceWorkState == WorkState[1]) {
+			this.OutputSource = pv.power > 100 ? "Solar" : "Battery";
+		}
+
+		if (this.DeviceWorkState == WorkState[2]) {
+			this.OutputSource = "Grid"
+		}
 
 		this.AccumulatedPvPower = 0;
 		this.AccumulatedBatteryPower = 0;
 		this.AccumulatedGridPower = 0;
 		this.AccumulatedOutputPower = 0;
+
+		ValuesConfig.OutputSource.icon = Helpers.SourceToIcon(this.OutputSource);
+		ValuesConfig.BatterySocPercent.icon = Helpers.BatteryPercentToIcon(this.BatterySocPercent, this.BatteryState);
 	}
 }
 
@@ -349,6 +362,10 @@ const ValuesConfig = {
 		icon: 'mdi:power-plug',
 		device_class: 'power_factor',
 		state_class: 'measurement'
+	},
+	OutputSource: {
+		unit_of_measurement: '',
+		icon: 'mdi:power-plug',
 	},
 
 	AccumulatedPvPower: {

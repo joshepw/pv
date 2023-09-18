@@ -28,6 +28,11 @@ const client = mqtt.connect(`mqtt://${Config.MQTT.host}`, {
 const client_status = {
 	mqtt_connected: false,
 	mbus_connected: false,
+	pv_data: {
+		voltage: 0,
+		current: 0,
+		power: 0,
+	},
 };
 
 /**
@@ -100,9 +105,8 @@ const connectToSerial = () => {
 					try {
 						const config = (await modbus.readHoldingRegisters(30000, 27)).data;
 						const values = (await modbus.readHoldingRegisters(30030, 30)).data;
-						const pv = await readADCValues();
 
-						onSendData(new Models.Values(config, values, pv));
+						onSendData(new Models.Values(config, values, client_status.pv_data));
 					} catch (error) {
 						console.warn(`[MBUS] ${new Date()} - ${error}`);
 					}
@@ -147,10 +151,27 @@ client.on('connect', () => {
 		sendProbeSensorConfig(key);
 	});
 
+	client.subscribe(Config.MQTT.topics.inverter, (err) => {
+		console.log(`[MQTT] ${new Date()} - Error to subscribe ${Config.MQTT.topics.inverter}: ${err}`)
+	});
+
 	connectToSerial();
 });
 
 client.on('close', () => {
 	client_status.mqtt_connected = false;
 	process.exit(1);
+});
+
+client.on("message", (topic, message) => {
+	if (Config.MQTT.topics.inverter == topic) {
+		const data = message.toString();
+		const json = JSON.parse(data);
+
+		client_status.pv_data.current = json.current || 0;
+		client_status.pv_data.power = json.power || 0;
+		client_status.pv_data.voltage = json.voltage || 0;
+	}
+
+	client.end();
 });

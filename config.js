@@ -14,4 +14,7 @@ exports.MQTT = {
 	host: 'home.local',
 	user: 'joshepw',
 	pass: 'codelyoko',
+	topics: {
+		inverter: "esp/inverter",
+	}
 };
