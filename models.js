@@ -34,7 +34,6 @@ class Values {
 		this.BatteryTemperature = Helpers.ParseSignedValue(config[16]);
 		this.BatterySocPercent = Helpers.ParseSignedValue(config[17]);
 
-		this.GridCharge = Boolean(config[24]);
 		this.GridState = GridState[config[25]];
 		this.GridVoltage = Helpers.ParseValue(values[2], 0.1);
 		this.GridPower = config[2] == 2 ? Helpers.ParseSignedValue(values[18]) : 0;
@@ -252,10 +251,6 @@ const ValuesConfig = {
 		device_class: 'battery',
 		state_class: 'measurement'
 	},
-	GridCharge: {
-		unit_of_measurement: '',
-		icon: 'mdi:transmission-tower',
-	},
 	GridState: {
 		unit_of_measurement: '',
 		icon: 'mdi:transmission-tower',
@@ -362,7 +357,7 @@ const ValuesConfig = {
 		unit_of_measurement: 'VA',
 		icon: 'mdi:power-plug',
 		device_class: 'current',
-		state_class: 'measurement'
+		state_class: 'apparent_power'
 	},
 	OutputLoadPercent: {
 		unit_of_measurement: '%',
