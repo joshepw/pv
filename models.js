@@ -356,8 +356,8 @@ const ValuesConfig = {
 	OutputVoltageCurrent: {
 		unit_of_measurement: 'VA',
 		icon: 'mdi:power-plug',
-		device_class: 'current',
-		state_class: 'apparent_power'
+		device_class: 'apparent_power',
+		state_class: 'measurement'
 	},
 	OutputLoadPercent: {
 		unit_of_measurement: '%',
